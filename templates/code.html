@@ -33,32 +33,9 @@
     <p><a href="/logout" id="manual-logout">Se déconnecter</a></p>
   </div>
 
-  <script>
-let timer;
-const logoutAfter = 30 * 1000; // 5 minutes
+  <script src="{{ url_for('static', filename='activity.js') }}"></script>
 
-function resetTimer() {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-        // Déconnexion après inactivité
-        fetch("/logout", { method: "POST" }).then(() => {
-            window.location.href = "/"; // redirection vers login
-        });
-    }, logoutAfter);
-}
 
-// Détecte interactions utilisateur
-window.addEventListener("mousemove", resetTimer);
-window.addEventListener("keydown", resetTimer);
-window.addEventListener("scroll", resetTimer);
-window.addEventListener("click", resetTimer);
-
-// Détecte quand l’utilisateur écrit dans un champ
-document.addEventListener("input", resetTimer);
-
-// Initialise le timer
-resetTimer();
-</script>
 
 </body>
 </html>
