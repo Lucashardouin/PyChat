@@ -1,2 +1,11 @@
 flask
+flask_socketio
 pynacl
+streamlit
+json
+html
+argon2
+time
+os
+base64
+secrets
