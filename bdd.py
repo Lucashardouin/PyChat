@@ -3,6 +3,8 @@ import sqlite3
 import hashlib
 from nacl import secret, utils
 import json
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired  # utile pour les tockens
+
 
 # -----------------------------
 # -- Initialisation Flask
@@ -72,7 +74,7 @@ def create_session(user1_id, user2_id, user1_code, user2_code):
 
 # Dictionnaire global pour stocker les messages éphémères
 # La clé est un tuple (user1_id, user2_id), les valeurs sont des listes de messages
-#sessions_messages = {}
+
 
 # Fonction pour ajouter un message à une session éphémère
 def add_message(sender_id, receiver_id, message):
@@ -85,6 +87,49 @@ def add_message(sender_id, receiver_id, message):
     )
     connexion.commit()
     connexion.close()
+
+
+
+
+# FONCTIONS TOKEN - ajoutees
+
+# Cree le sérialiseur qui signe/verifie les jetons datés avec la cle secrete Flask (salt = type de jeton)
+def _chat_serializer():  
+    return URLSafeTimedSerializer(app.secret_key, salt="chat-token")  
+
+
+# Cree un jeton de chat pour l’onglet (contient uid + peer_id)
+def issue_chat_token(user_id, peer_id):  
+    s = _chat_serializer()
+    return s.dumps({"uid": int(user_id), "peer_id": int(peer_id)})  
+
+
+# Verifie signature + expiration et renvoie le payload
+def verify_chat_token(token, max_age=3600):  
+    s = _chat_serializer()
+    return s.loads(token, max_age=max_age)  
+
+
+
+# Renvoie l’ID user depuis le token si present, sinon depuis la session
+def current_user_from_token_or_session(expected_peer_id=None):  
+    
+    # Recupere le token envoyé par le front (header / query / form)
+    token = (request.headers.get("X-Chat-Token")                 
+             or request.args.get("token")                        
+             or request.form.get("token"))                       
+    if token:                                                    
+        try:                                                     
+            data = verify_chat_token(token)    
+
+            # Si un pair est attendu, vérifier que le token correspond                  
+            if expected_peer_id is None or int(data["peer_id"]) == int(expected_peer_id):  
+                return int(data["uid"])                          
+        except (BadSignature, SignatureExpired):                 
+            return None   
+    # Fallback : cookie Flask                                        
+    return session.get("user_id")                                
+
 
 
 
@@ -158,20 +203,27 @@ def chat_page(peer_id):
     connexion.close()
     peer_name = row["username"] if row else "Inconnu"
 
+    # TOCKEN
+    chat_token = issue_chat_token(user_id, peer_id) ##
+
     return render_template(
         "messagerie.html",
         peer_id=peer_id,
         current_user_id=user_id,
         # Récuperer le nom d'utilisateur
         peer_name=peer_name,
-        current_username=session.get("username", "Moi")
+        current_username=session.get("username", "Moi"),
+        # TOCKEN
+        chat_token=chat_token, #
     )
 
 
 # Route pour envoyer un message
 @app.route("/send_message/<int:peer_id>", methods=["POST"])
 def send_message(peer_id):
-    user_id = session.get("user_id")
+    #user_id = session.get("user_id")   - TOCKEN
+    user_id = current_user_from_token_or_session(expected_peer_id=peer_id) #
+
     if not user_id:
         return jsonify({"error": "not logged in"}), 403
     msg = request.form["message"]
@@ -183,7 +235,9 @@ def send_message(peer_id):
 # Route pour recuperer les messages ephemeres en JSON
 @app.route("/get_messages/<int:peer_id>")
 def get_messages(peer_id):
-    current_user = session.get("user_id")
+    # current_user = session.get("user_id") - TOCKEN
+    current_user = current_user_from_token_or_session(expected_peer_id=peer_id) #
+
     if not current_user:
         return jsonify([])
 
