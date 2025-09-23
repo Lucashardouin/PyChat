@@ -52,13 +52,13 @@ def verify_user_code(user_id, code):
     return False
 
 
-# Cree une session éphémère entre 2 utilisateurs
+# Cree une session ephemere entre 2 utilisateurs
 def create_session(user1_id, user2_id, user1_code, user2_code):
     connexion = get_db()
     cursor = connexion.cursor()
     # Tri des ID pour avoir une cle unique (peu importe l'ordre)
     key = tuple(sorted([user1_id, user2_id]))
-    # Verifie si la session existe déjà
+    # Verifie si la session existe deja
     cursor.execute("SELECT id FROM sessions WHERE user1_id=? AND user2_id=?", key)
     if not cursor.fetchone():
         # Stocke les codes saisis dans un JSON
@@ -69,12 +69,38 @@ def create_session(user1_id, user2_id, user1_code, user2_code):
     connexion.close()
 
 
+
+# Dictionnaire global pour stocker les messages éphémères
+# La clé est un tuple (user1_id, user2_id), les valeurs sont des listes de messages
+#sessions_messages = {}
+
+# Fonction pour ajouter un message à une session éphémère
+#def add_message(user1_id, user2_id, message):
+#    key = tuple(sorted([user1_id, user2_id]))  # clé unique pour la session
+#    if key not in sessions_messages:
+#        sessions_messages[key] = []
+#    sessions_messages[key].append(message)
+
+
+def add_message(sender_id, receiver_id, message):
+    key = "-".join(map(str, sorted([sender_id, receiver_id])))
+    connexion = get_db()
+    cursor = connexion.cursor()
+    cursor.execute(
+        "INSERT INTO messages (sender_id, receiver_id, session_key, content) VALUES (?, ?, ?, ?)",
+        (int(sender_id), int(receiver_id), key, message)
+    )
+    connexion.commit()
+    connexion.close()
+
+
+
 # (
 # -----------------------------
-# -- Flask
+# -- Flask 
 # -----------------------------
 
-# Page de login 
+# Page d'authentification : login.html
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -88,9 +114,10 @@ def login():
             return redirect(url_for("code_page"))
         else:
             return "Mot de passe incorrect"
-    return render_template("login.html")  # formulaire HTML -- A MODIFIER
+    return render_template("login.html")  # formulaire HTML d'authentification
 
-# Page pour saisir les codes pour activer la session de chat
+
+# Page pour saisir les codes pour activer la session de chat : code.html
 @app.route("/code", methods=["GET", "POST"])
 def code_page():
     if "user_id" not in session:
@@ -115,11 +142,102 @@ def code_page():
         if verify_user_code(session["user_id"], user_code) and verify_user_code(peer_id, peer_code):
             # Cree la session ephemere active
             create_session(session["user_id"], peer_id, user_code, peer_code)
-            return "Session activée ! Vous pouvez commencer à discuter."
+            return redirect(url_for("chat_page", peer_id=peer_id))  # redirection vers page de chat 
         else:
             return "Codes invalides"
 
-    return render_template("code.html")  # formulaire HTML pour codes -- A MODIFIER
+    return render_template("code.html")  # formulaire HTML pour codes 
+
+
+# Page de messagerie : messagerie.html
+#@app.route("/chat/<int:peer_id>")
+#def chat_page(peer_id):
+#    if "user_id" not in session:
+#        return redirect(url_for("login"))
+
+#    user_id = session["user_id"]
+#    key = tuple(sorted([user_id, peer_id]))
+#    messages = sessions_messages.get(key, [])  # récupère les messages existants
+
+    # Transmet l'ID du destinataire au template pour que le formulaire sache à qui envoyer le message
+#    return render_template("messagerie.html", peer_id=peer_id, messages=messages)
+
+@app.route("/chat/<int:peer_id>")
+def chat_page(peer_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    user_id = session["user_id"]
+    return render_template(
+        "messagerie.html",
+        peer_id=peer_id,
+        current_user_id=user_id
+    )
+
+
+# Route pour envoyer un message
+#@app.route("/send_message/<int:peer_id>", methods=["POST"])
+#def send_message(peer_id):
+    # Verification que l'utilisateur est connecte
+#    if "user_id" not in session:
+#        return jsonify({"error": "not logged in"}), 403
+
+#    user_id = session["user_id"] # ID de l'utilisateur connecte
+#    msg = request.form["message"] # Message envoye depuis le formulaire
+
+#    key = tuple(sorted([user_id, peer_id]))
+#    if key not in sessions_messages:
+#        sessions_messages[key] = []
+
+#    sessions_messages[key].append(msg)  # stocke juste le texte du message
+
+#    return jsonify({"status": "ok"})
+
+
+@app.route("/send_message/<int:peer_id>", methods=["POST"])
+def send_message(peer_id):
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "not logged in"}), 403
+    msg = request.form["message"]
+    add_message(user_id, peer_id, msg)
+    return jsonify({"status": "ok"})
+
+
+
+# Route pour recuperer les messages ephemeres en JSON
+#@app.route("/get_messages/<int:peer_id>")
+#def get_messages(peer_id):
+    # Verifie que l'utilisateur est connecte
+#    if "user_id" not in session:
+#        return jsonify([]) # retourne une liste vide si pas connecte
+
+#    user_id = session["user_id"] # ID de l'utilisateur connecte
+#    key = tuple(sorted([user_id, peer_id]))
+
+    # Renvoie la liste des messages pour cette la session (vide si aucune)
+#    return jsonify(sessions_messages.get(key, []))  
+
+
+@app.route("/get_messages/<int:peer_id>")
+def get_messages(peer_id):
+    current_user = session.get("user_id")
+    if not current_user:
+        return jsonify([])
+
+    key = "-".join(map(str, sorted([current_user, peer_id])))
+
+    connexion = get_db()
+    cursor = connexion.cursor()
+    cursor.execute(
+        "SELECT sender_id AS 'from', content AS msg FROM messages WHERE session_key=? ORDER BY timestamp ASC, id ASC",
+        (key,)
+    )
+    rows = cursor.fetchall()
+    connexion.close()
+
+    return jsonify([dict(r) for r in rows])
+
+
 
 # )
 
@@ -158,12 +276,26 @@ def init_db():
                    "FOREIGN KEY(user1_id) REFERENCES users(id),"
                    "FOREIGN KEY(user2_id) REFERENCES users(id))")
 
+    # Creation table messages
+    cursor.execute(""" CREATE TABLE IF NOT EXISTS messages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sender_id INTEGER NOT NULL,
+                    receiver_id INTEGER NOT NULL,
+                    session_key TEXT NOT NULL,            -- clé triée "minId-maxId"
+                    content TEXT NOT NULL,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY(sender_id) REFERENCES users(id),
+                    FOREIGN KEY(receiver_id) REFERENCES users(id))""")
+    
+    # Index utile pour les lectures
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_messages_session_ts ON messages(session_key, timestamp)")
 
 
 
     # -----------------------------
     # -- Insertion de 4 utilisateurs test
     # -----------------------------
+    # utilisateur, mot de passe, code secret
     users_list = [
         ("Alice", "mdp123", "123456"),
         ("Bob", "mdp456", "456798"),
@@ -176,7 +308,7 @@ def init_db():
         # Verifie si l'utilisateur existe deja
         cursor.execute("SELECT id FROM users WHERE username=?", (username,))
         if cursor.fetchone():
-            continue  # utilisateur deja présent
+            continue  # utilisateur deja present
 
         # Hash du mot de passe
         password_hash = hashlib.sha256(password.encode()).hexdigest()
@@ -203,8 +335,17 @@ def init_db():
 # -- Lancer le site
 # -----------------------------
 
+#if __name__ == "__main__":
+#    init_db()       # initialise la base et cree les utilisateurs test
+#    app.run(debug=True)
+
+
+#if __name__ == "__main__":
+#    init_db()
+#    app.run(debug=True, threaded=True)
+
 if __name__ == "__main__":
-    init_db()       # initialise la base et cree les utilisateurs test
-    app.run(debug=True)
+    init_db()
+    app.run(debug=True, use_reloader=False)
 
 # )
