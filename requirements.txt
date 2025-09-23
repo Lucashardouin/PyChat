@@ -1,5 +1,6 @@
 flask
-flask_socketio
+flask-socketio
+flask-cors
 pynacl
 streamlit
 json
