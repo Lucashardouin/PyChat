@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation Session</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Activation d'une session de chat</h1>
+    <form method="POST" action="/code">
+      <label for="peer">Nom du pair :</label>
+      <input type="text" id="peer" name="peer" required>
+
+      <label for="user_code">Votre code secret :</label>
+      <input type="text" id="user_code" name="user_code" required>
+
+      <label for="peer_code">Code secret du pair :</label>
+      <input type="text" id="peer_code" name="peer_code" required>
+
+      <button type="submit">Activer la session</button>
+    </form>
+
+    {% if session.get('code_error') %}
+      <p class="error">{{ session.get('code_error') }}</p>
+    {% endif %}
+
+    {% if session.get('code_success') %}
+      <p class="success">{{ session.get('code_success') }}</p>
+    {% endif %}
+
+    <p><a href="/logout" id="manual-logout">Se déconnecter</a></p>
+  </div>
+
+  <script>
+let timer;
+const logoutAfter = 30 * 1000; // 5 minutes
+
+function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+        // Déconnexion après inactivité
+        fetch("/logout", { method: "POST" }).then(() => {
+            window.location.href = "/"; // redirection vers login
+        });
+    }, logoutAfter);
+}
+
+// Détecte interactions utilisateur
+window.addEventListener("mousemove", resetTimer);
+window.addEventListener("keydown", resetTimer);
+window.addEventListener("scroll", resetTimer);
+window.addEventListener("click", resetTimer);
+
+// Détecte quand l’utilisateur écrit dans un champ
+document.addEventListener("input", resetTimer);
+
+// Initialise le timer
+resetTimer();
+</script>
+
+</body>
+</html>
