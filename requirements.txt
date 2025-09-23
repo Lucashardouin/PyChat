@@ -5,6 +5,7 @@ streamlit
 json
 html
 argon2
+argon2-cffi
 time
 os
 base64
