@@ -75,13 +75,6 @@ def create_session(user1_id, user2_id, user1_code, user2_code):
 #sessions_messages = {}
 
 # Fonction pour ajouter un message à une session éphémère
-#def add_message(user1_id, user2_id, message):
-#    key = tuple(sorted([user1_id, user2_id]))  # clé unique pour la session
-#    if key not in sessions_messages:
-#        sessions_messages[key] = []
-#    sessions_messages[key].append(message)
-
-
 def add_message(sender_id, receiver_id, message):
     key = "-".join(map(str, sorted([sender_id, receiver_id])))
     connexion = get_db()
@@ -150,49 +143,32 @@ def code_page():
 
 
 # Page de messagerie : messagerie.html
-#@app.route("/chat/<int:peer_id>")
-#def chat_page(peer_id):
-#    if "user_id" not in session:
-#        return redirect(url_for("login"))
-
-#    user_id = session["user_id"]
-#    key = tuple(sorted([user_id, peer_id]))
-#    messages = sessions_messages.get(key, [])  # récupère les messages existants
-
-    # Transmet l'ID du destinataire au template pour que le formulaire sache à qui envoyer le message
-#    return render_template("messagerie.html", peer_id=peer_id, messages=messages)
-
 @app.route("/chat/<int:peer_id>")
 def chat_page(peer_id):
     if "user_id" not in session:
         return redirect(url_for("login"))
+    
     user_id = session["user_id"]
+
+    # Récupère le nom du pair
+    connexion = get_db()
+    cur = connexion.cursor()
+    cur.execute("SELECT username FROM users WHERE id=?", (peer_id,))
+    row = cur.fetchone()
+    connexion.close()
+    peer_name = row["username"] if row else "Inconnu"
+
     return render_template(
         "messagerie.html",
         peer_id=peer_id,
-        current_user_id=user_id
+        current_user_id=user_id,
+        # Récuperer le nom d'utilisateur
+        peer_name=peer_name,
+        current_username=session.get("username", "Moi")
     )
 
 
 # Route pour envoyer un message
-#@app.route("/send_message/<int:peer_id>", methods=["POST"])
-#def send_message(peer_id):
-    # Verification que l'utilisateur est connecte
-#    if "user_id" not in session:
-#        return jsonify({"error": "not logged in"}), 403
-
-#    user_id = session["user_id"] # ID de l'utilisateur connecte
-#    msg = request.form["message"] # Message envoye depuis le formulaire
-
-#    key = tuple(sorted([user_id, peer_id]))
-#    if key not in sessions_messages:
-#        sessions_messages[key] = []
-
-#    sessions_messages[key].append(msg)  # stocke juste le texte du message
-
-#    return jsonify({"status": "ok"})
-
-
 @app.route("/send_message/<int:peer_id>", methods=["POST"])
 def send_message(peer_id):
     user_id = session.get("user_id")
@@ -205,19 +181,6 @@ def send_message(peer_id):
 
 
 # Route pour recuperer les messages ephemeres en JSON
-#@app.route("/get_messages/<int:peer_id>")
-#def get_messages(peer_id):
-    # Verifie que l'utilisateur est connecte
-#    if "user_id" not in session:
-#        return jsonify([]) # retourne une liste vide si pas connecte
-
-#    user_id = session["user_id"] # ID de l'utilisateur connecte
-#    key = tuple(sorted([user_id, peer_id]))
-
-    # Renvoie la liste des messages pour cette la session (vide si aucune)
-#    return jsonify(sessions_messages.get(key, []))  
-
-
 @app.route("/get_messages/<int:peer_id>")
 def get_messages(peer_id):
     current_user = session.get("user_id")
