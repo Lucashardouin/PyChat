@@ -15,6 +15,9 @@
 <body
   data-current-user-id="{{ current_user_id }}"
   data-peer-id="{{ peer_id }}"
+  
+  data-peer-name="{{ peer_name }}"
+  data-current-username="{{ current_username }}"
 >
 
   <h2>Messagerie sécurisée</h2>
@@ -30,6 +33,8 @@
     // Récupération des IDs depuis les attributs HTML
     const currentUserId = Number(document.body.dataset.currentUserId);
     const peerId        = Number(document.body.dataset.peerId);
+    const peerName         = document.body.dataset.peerName;
+    const currentUsername  = document.body.dataset.currentUsername; //
 
     const chatDiv = document.getElementById("chat");
     const form    = document.getElementById("chatForm");
@@ -40,13 +45,13 @@
       chatDiv.innerHTML = "";
       messages.forEach(msg => {
         const p = document.createElement("p");
-        const fromId = parseInt(msg.from, 10); // ✅ conversion sûre
+        const fromId = parseInt(msg.from, 10); // conversion sûre
 
         if (fromId === currentUserId) {
             p.textContent = "Moi: " + msg.msg;
             p.className = "my-message";
         } else {
-            p.textContent = "- : " + msg.msg;
+            p.textContent = peerName + ": " + msg.msg;    
             p.className = "peer-message";
         }
 
