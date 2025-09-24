@@ -1,0 +1,32 @@
+{
+  "GHOST-7": {
+    "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+    "real_password": "survivor2087",
+    "role": "survivor",
+    "joined": "2087-03-15"
+  },
+  "RAVEN-2": {
+    "password": "516b9783fca517eecbd1d064da2d165310b19759c4b8b1d3aa0c4767d1e7d6bb",
+    "real_password": "wasteland42",
+    "role": "survivor",
+    "joined": "2087-03-18"
+  },
+  "PHOENIX-1": {
+    "password": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+    "real_password": "nexus9999",
+    "role": "commander",
+    "joined": "2087-03-10"
+  },
+  "SHADOW-5": {
+    "password": "c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646",
+    "real_password": "darkzone88",
+    "role": "survivor",
+    "joined": "2087-03-20"
+  },
+  "VIPER-3": {
+    "password": "181210f8f9c779c26da1d9b2075bde0127302ee0e3fca38c9a83f5b1dd8e5d3b",
+    "real_password": "stealth123",
+    "role": "survivor",
+    "joined": "2087-03-22"
+  }
+}
