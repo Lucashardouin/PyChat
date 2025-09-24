@@ -8,18 +8,45 @@
         form { max-width: 400px; margin: auto; }
         input { display: block; margin: 10px 0; width: 100%; padding: 8px; }
         input[type="submit"] { cursor: pointer; }
+        .user-badge { position: fixed; top: 10px; right: 12px; font-family: Arial, sans-serif;
+                background: rgba(0,0,0,0.6); color:#fff; padding: 6px 10px; border-radius: 12px;
+                font-size: 12px; z-index: 9999; }
+        .user-badge a { color:#ffd1d1; text-decoration:none; margin-left:8px; }
+        
     </style>
+<style>
+  .flash-box { margin: 12px 0; }
+  .flash { padding: 10px; border-radius: 8px; margin: 6px 0; }
+  .flash.error { background: #ffe6e6; color: #a40000; border: 1px solid #ffb3b3; }
+  .flash.success { background: #e6ffea; color: #00661a; border: 1px solid #a6f3b1; }
+</style>
 </head>
 <body>
-    <h2>Activation de session sécurisée</h2>
+  {% if current_username %}
+  <div class="user-badge">
+    Logged as {{ current_username }} <a href="/logout" title="Log out">Logout</a>
+  </div>
+  {% endif %}
+
+    <h2>Start secure session</h2>
     <form method="POST">
-        <label>Nom du pair :</label>
+        <label>Peer username :</label>
         <input type="text" name="peer" required>
-        <label>Votre code :</label>
+        <label>Your code :</label>
         <input type="text" name="user_code" required>
-        <label>Code du pair :</label>
+        <label>Peer code :</label>
         <input type="text" name="peer_code" required>
-        <input type="submit" value="Démarrer la session">
+        <input type="submit" value="Start session">
     </form>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-box">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 </body>
 </html>
