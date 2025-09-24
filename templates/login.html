@@ -9,12 +9,34 @@
         form { max-width: 300px; margin: auto; }
         input { display: block; margin: 10px 0; width: 100%; padding: 8px; }
         input[type="submit"] { cursor: pointer; }
+        .flash-message {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .flash-message.error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
   <div class="container">
     <h1>Connexion</h1>
-    <form method="POST" action="/login">
+    <!-- Messages Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message {{ category }}" id="flash-message-{{ loop.index }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST" action="/login" id="loginForm">
       <label for="username">Nom d'utilisateur :</label>
       <input type="text" id="username" name="username" placeholder="nom du'utilisateur" required>
 
@@ -28,13 +50,35 @@
       |
       <a href="{{ url_for('index') }}">Retour à l'accueil</a>
     </div>
-    {% if session.get('login_error') %}
-      <p class="error">{{ session.get('login_error') }}</p>
-    {% endif %}
   </div>
 
 
   <script>
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+            alert('Veuillez remplir tous les champs !');
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Masquer les messages flash après 5 secondes
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        
+        flashMessages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.opacity = '0';
+                setTimeout(function() {
+                    message.style.display = 'none';
+                }, 500);
+            }, 5000);
+        });
+    });
     // Variables pour détecter les types de navigation
     let isFormSubmission = false;
     let isReload = false;

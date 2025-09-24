@@ -80,9 +80,13 @@ def authenticate_user(username, password):
     row = cursor.fetchone()
     connexion.close()
     # Verifie si le hash du mot de passe correspond
-    if row and row["password_hash"] == hashlib.sha256(password.encode()).hexdigest():
-        return row["id"]  # retourne l'ID utilisateur
-    return None
+    if not row:
+        return None, "Utilisateur introuvable"
+    
+    if row["password_hash"] != hashlib.sha256(password.encode()).hexdigest():
+        return None, "Mot de passe incorrect"
+    
+    return row["id"], "Connexion réussie"
 
 
 # Verifie si le code saisi correspond au code de l'utilisateur
@@ -249,7 +253,7 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        user_id = authenticate_user(username, password)
+        user_id, message = authenticate_user(username, password)
         if user_id:
             # Sauvegarde info utilisateur dans session Flask
             session["user_id"] = user_id
@@ -257,7 +261,8 @@ def login():
             session["last_activity"] = datetime.utcnow().timestamp()
             return redirect(url_for("code_page"))
         else:
-            return render_template("login.html", error="Mot de passe incorrect")
+            flash(message,"error")
+            return redirect(url_for("login"))
     return render_template("login.html")  # formulaire HTML d'authentification
 
 
