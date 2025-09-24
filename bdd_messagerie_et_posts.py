@@ -62,7 +62,7 @@ def create_session(user1_id, user2_id, user1_code, user2_code):
     # Tri des ID pour avoir une cle unique (peu importe l'ordre)
     key = tuple(sorted([user1_id, user2_id]))
     
-    # Clé messages (même format que ta table messages)
+    # Clé messages (même format que la table messages)
     session_key = f"{min(user1_id, user2_id)}-{max(user1_id, user2_id)}"
     cursor.execute("DELETE FROM messages WHERE session_key=?", (session_key,))  
 
@@ -497,5 +497,6 @@ def init_db():
 if __name__ == "__main__":
     init_db()
     app.run(debug=True, use_reloader=False)
+
 
 # )
