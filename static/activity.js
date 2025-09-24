@@ -7,7 +7,7 @@ let activityTimer;
 function logoutAndRedirect() {
     fetch("/logout", { method: "POST" })
         .finally(() => {
-            window.location.href = "/"; // redirection vers login
+            window.location.href = "/login"; // redirection vers login
         });
 }
 

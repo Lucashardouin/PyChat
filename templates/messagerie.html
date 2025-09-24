@@ -30,6 +30,9 @@
     <input type="text" name="message" id="message" placeholder="Votre message">
     <input type="submit" value="Envoyer" id="send">
   </form>
+  <p><a href="/logout" id="manual-logout">Se déconnecter</a></p>
+
+  <script src="{{ url_for('static', filename='activity.js') }}"></script>
 
   <script>
     // Récupération des IDs depuis les attributs HTML

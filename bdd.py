@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify, make_response
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, make_response, flash, get_flashed_messages
 import sqlite3
 import hashlib
 from nacl import secret, utils
@@ -35,6 +35,41 @@ def get_db():
     connexion = sqlite3.connect(DB_PATH)  
     connexion.row_factory = sqlite3.Row  # permet d’acceder aux colonnes par nom
     return connexion
+
+# INSCRIPTION
+def create_user(username, password, code):
+    """Crée un nouvel utilisateur avec son code secret"""
+    connexion = get_db()
+    cursor = connexion.cursor()
+    
+    # Vérifier si l'utilisateur existe déjà
+    cursor.execute("SELECT id FROM users WHERE username=?", (username,))
+    if cursor.fetchone():
+        connexion.close()
+        return False, "Ce nom d'utilisateur existe déjà"
+    
+    try:
+        # Hash du mot de passe
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        encryption_key = utils.random(secret.SecretBox.KEY_SIZE)
+
+        # Insérer l'utilisateur
+        cursor.execute("INSERT INTO users (username, password_hash, encryption_key) VALUES (?, ?, ?)",
+                       (username, password_hash, encryption_key))
+        user_id = cursor.lastrowid
+
+        # Insérer son code secret
+        code_hash = hashlib.sha256(code.encode()).hexdigest()
+        cursor.execute("INSERT INTO user_codes (user_id, code_hash) VALUES (?, ?)", (user_id, code_hash))
+
+        connexion.commit()
+        connexion.close()
+        return True, "Compte créé avec succès"
+    
+    except Exception as e:
+        connexion.rollback()
+        connexion.close()
+        return False, f"Erreur lors de la création du compte: {str(e)}"
 
 
 # Authentifie un utilisateur par username et mot de passe
@@ -166,9 +201,50 @@ def current_user_from_token_or_session(expected_peer_id=None):
 # -----------------------------
 # -- Flask 
 # -----------------------------
+@app.route("/", methods=["GET", "POST"])
+def index():
+    return render_template("index.html")
+
+# REGISTER
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        code = request.form["code"].strip()
+        
+        # Validations
+        if not username or len(username) < 3:
+            flash("Le nom d'utilisateur doit contenir au moins 3 caractères", "error")
+            return redirect(url_for("register"))
+        
+        if not password or len(password) < 6:
+            flash("Le mot de passe doit contenir au moins 6 caractères", "error")
+            return redirect(url_for("register"))
+        
+        if password != confirm_password:
+            flash("Les mots de passe ne correspondent pas", "error")
+            return redirect(url_for("register"))
+        
+        if not code or len(code) < 6:
+            flash("Le code secret doit contenir au moins 6 caractères", "error")
+            return redirect(url_for("register"))
+        
+        # Créer l'utilisateur
+        success, message = create_user(username, password, code)
+        
+        if success:
+            flash(message, "success")
+            return redirect(url_for("login"))
+        else:
+            flash(message, "error")
+            return redirect(url_for("register"))
+    
+    return render_template("register.html")
 
 # Page d'authentification : login.html
-@app.route("/", methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]
@@ -181,7 +257,7 @@ def login():
             session["last_activity"] = datetime.utcnow().timestamp()
             return redirect(url_for("code_page"))
         else:
-            return "Mot de passe incorrect"
+            return render_template("login.html", error="Mot de passe incorrect")
     return render_template("login.html")  # formulaire HTML d'authentification
 
 
