@@ -1,4 +1,3 @@
-
 # lan_chat_server.py
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify, flash
 from flask_cors import CORS
