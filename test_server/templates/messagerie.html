@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Messagerie sécurisée</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #chat { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; }
+    #message { width: 80%; padding: 5px; }
+    #send { padding: 5px; }
+    .my-message { color: blue; text-align: right; }
+    .peer-message { color: green; text-align: left; }
+  </style>
+</head>
+<body
+  data-current-user-id="{{ current_user_id }}"
+  data-peer-id="{{ peer_id }}"
+  data-peer-name="{{ peer_name }}"
+  data-current-username="{{ current_username }}"
+  data-chat-token="{{ chat_token }}"
+>
+  <h2>Messagerie sécurisée</h2>
+  <div id="chat"></div>
+  <form id="chatForm">
+    <input type="text" name="message" id="message" placeholder="Votre message">
+    <input type="submit" value="Envoyer" id="send">
+  </form>
+  <script>
+    const currentUserId = Number(document.body.dataset.currentUserId);
+    const peerId        = Number(document.body.dataset.peerId);
+    const peerName      = document.body.dataset.peerName;
+    const currentUsername  = document.body.dataset.currentUsername;
+    const chatToken     = document.body.dataset.chatToken;
+    const chatDiv = document.getElementById("chat");
+    const form    = document.getElementById("chatForm");
+    const input   = document.getElementById("message");
+
+    function renderMessages(messages) {
+      chatDiv.innerHTML = "";
+      messages.forEach(msg => {
+        const p = document.createElement("p");
+        const fromId = parseInt(msg.from, 10);
+        if (fromId === currentUserId) {
+            p.textContent = "Moi: " + msg.msg;
+            p.className = "my-message";
+        } else {
+            p.textContent = peerName + ": " + msg.msg;
+            p.className = "peer-message";
+        }
+        chatDiv.appendChild(p);
+      });
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    function fetchMessages() {
+      fetch(`/get_messages/${peerId}`, {
+        headers: {'X-Chat-Token': chatToken}
+      })
+        .then(resp => resp.json())
+        .then(messages => {
+          console.log("currentUserId:", currentUserId, "peerId:", peerId, "messages:", messages);
+          renderMessages(messages);
+        })
+        .catch(err => console.error("Erreur fetchMessages:", err));
+    }
+
+    setInterval(fetchMessages, 2000);
+    fetchMessages();
+
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const messageText = input.value.trim();
+      if (!messageText) return;
+      fetch(`/send_message/${peerId}`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Chat-Token': chatToken
+        },
+        body: `message=${encodeURIComponent(messageText)}`
+      })
+      .then(() => { input.value = ""; fetchMessages(); })
+      .catch(err => console.error("Erreur envoi message:", err));
+    });
+  </script>
+</body>
+</html>
