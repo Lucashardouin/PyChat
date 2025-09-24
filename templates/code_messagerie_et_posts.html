@@ -139,5 +139,20 @@
 </script>
 
 
+<script>
+  // Gestion de l'ouverture de posts : toujours UN seul <details> ouvert.
+  // Quand l’utilisateur en ouvre un, on referme tous les autres.
+  // On écoute l’événement "toggle" en CAPTURE (true) car il ne remonte pas (pas de bubbling)
+  //  fonctionne même si la liste est recréée dynamiquement
+  document.addEventListener('toggle', (e) => {
+    const d = e.target;
+    if (d.tagName !== 'DETAILS' || !d.open) return;
+    document.querySelectorAll('#postsList details.post[open]').forEach(o => {
+      if (o !== d) o.open = false;
+    });
+  }, true);
+</script>
+
+
 </body>
 </html>
