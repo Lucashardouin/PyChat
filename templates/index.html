@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -545,3 +546,553 @@
 </body>
 </html>
 
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Terminal - Survivor Network</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff41;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background effects */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridPulse 4s ease-in-out infinite alternate;
+        }
+
+        .static-noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%2300ff41' fill-opacity='0.05' d='m0 0h1v1H0zm2 2h1v1H2z'/%3E%3C/svg%3E");
+            animation: staticMove 0.1s linear infinite;
+        }
+
+        @keyframes gridPulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.1; }
+        }
+
+        @keyframes staticMove {
+            0% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-1px) translateY(-1px); }
+            50% { transform: translateX(1px) translateY(0); }
+            75% { transform: translateX(0) translateY(1px); }
+            100% { transform: translateX(-1px) translateY(-1px); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid #00ff41;
+            padding: 15px 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .system-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 5px;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        .system-subtitle {
+            color: #ff6b35;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px #00ff41; }
+            100% { text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41; }
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            font-size: 0.8rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .online { background: #00ff41; }
+        .warning { background: #ffd700; }
+        .critical { background: #ff4444; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main content area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Login panel */
+        .login-panel {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .login-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: #00ff41;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #00ff41;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(0, 255, 65, 0.5);
+            border-radius: 5px;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            background: rgba(0, 20, 5, 0.8);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Chat area */
+        .chat-area {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(0, 255, 65, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .chat-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .chat-title {
+            color: #00ff41;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-status {
+            color: #ff6b35;
+            font-size: 0.8rem;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            min-height: 300px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid #00ff41;
+            border-radius: 0 5px 5px 0;
+            animation: messageAppear 0.5s ease-out;
+        }
+
+        .message-meta {
+            color: #ff6b35;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .message-content {
+            color: #00ff41;
+            line-height: 1.4;
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0, 255, 65, 0.3);
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(0, 255, 65, 0.5);
+            border-radius: 5px;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', monospace;
+            resize: none;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #00ff41;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Warning messages */
+        .warning-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: rgba(255, 68, 68, 0.1);
+            border: 2px solid #ff4444;
+            border-radius: 5px;
+            padding: 15px;
+            z-index: 100;
+            animation: warningBlink 2s infinite;
+        }
+
+        .warning-title {
+            color: #ff4444;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .warning-text {
+            color: #ffaaaa;
+            font-size: 0.9rem;
+        }
+
+        @keyframes warningBlink {
+            0%, 50% { border-color: #ff4444; }
+            25%, 75% { border-color: #ff6666; }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 65, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 65, 0.7);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .login-panel {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .system-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects">
+        <div class="grid-overlay"></div>
+        <div class="static-noise"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="system-title">NEXUS TERMINAL</h1>
+            <p class="system-subtitle">Wasteland Communication Network // Sector 7-Alpha</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <span>Network: ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator warning"></div>
+                <span>Security: CAUTION</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator critical"></div>
+                <span>Ultron Threat: HIGH</span>
+            </div>
+            <div class="status-item">
+                <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="login-panel" id="loginPanel">
+                <h2 class="login-title">SURVIVOR ACCESS</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" class="form-input" placeholder="Enter survivor ID..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter access code..." required>
+                    </div>
+                    <button type="submit" class="login-btn">CONNECT TO NETWORK</button>
+                </form>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <div class="chat-title">Survivor Communications</div>
+                    <div class="chat-status">⚡ 3 survivors online // Last broadcast: 2 minutes ago</div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages will be added dynamically -->
+                </div>
+
+                <div class="input-area">
+                    <textarea class="message-input" placeholder="Enter message... (Authentication required)" rows="2" disabled id="messageInput"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-panel">
+        <div class="warning-title">⚠ SYSTEM ALERT</div>
+        <div class="warning-text">Unauthorized access attempts detected. Maintain operational security at all times.</div>
+    </div>
+
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = `${timeString} PST`;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                // Simulate login process
+                document.getElementById('loginPanel').style.transform = 'translateX(-100%)';
+                document.getElementById('loginPanel').style.opacity = '0';
+
+                setTimeout(() => {
+                    document.getElementById('loginPanel').style.display = 'none';
+                    document.getElementById('messageInput').disabled = false;
+                    document.getElementById('messageInput').placeholder = `Connected as ${username}. Type your message...`;
+
+                    // Add login success message
+                    addMessage('SYSTEM', `User ${username} authenticated successfully. Welcome to the network.`);
+                }, 500);
+            }
+        });
+
+        // Add message function
+        function addMessage(sender, content) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            messageDiv.innerHTML = `
+                <div class="message-meta">[${sender}] - ${timeString}</div>
+                <div class="message-content">${content}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Handle message input
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = this.value.trim();
+                if (message) {
+                    const username = document.getElementById('username').value || 'UNKNOWN';
+                    addMessage(username, message);
+                    this.value = '';
+                }
+            }
+        });
+
+        // Initial system messages to display on startup
+        const initialMessages = [
+            { sender: 'SYSTEM', content: 'Network initialized. Welcome to the wasteland communication grid.', delay: 1000 },
+            { sender: 'SYSTEM', content: 'Warning: Unknown AI signatures detected on network perimeter.', delay: 3000 },
+            { sender: 'SYSTEM', content: 'Security protocol engaged. All transmissions are monitored.', delay: 5000 },
+            { sender: 'SYSTEM', content: 'Authentication required to participate in network communications.', delay: 7000 }
+        ];
+
+        // Display initial messages with delays
+        function displayInitialMessages() {
+            initialMessages.forEach((msg, index) => {
+                setTimeout(() => {
+                    addMessage(msg.sender, msg.content);
+                }, msg.delay);
+            });
+        }
+
+        // Start displaying messages when page loads
+        displayInitialMessages();
+    </script>
+</body>
+</html>
+
+
+>>>>>>> 20b27a4fb75d371202e04f50cc18b1d523a6e6b4

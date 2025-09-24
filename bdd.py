@@ -1,9 +1,10 @@
-from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify, make_response
 import sqlite3
 import hashlib
 from nacl import secret, utils
 import json
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired  # utile pour les tockens
+from datetime import datetime, timedelta
 
 
 # -----------------------------
@@ -13,6 +14,13 @@ app = Flask(__name__)
 
 # Cle secrete Flask pour les sessions
 app.secret_key = utils.random(secret.SecretBox.KEY_SIZE)
+
+# Cookie de session non permanent → disparaît à la fermeture de l’onglet
+app.config["SESSION_PERMANENT"] = False
+
+# Timeout d’inactivité (ex: 10 min)
+SESSION_TIMEOUT = timedelta(minutes=10)
+INACTIVITY_TIMEOUT = 10 
 
 # Chemin vers la base SQLite
 DB_PATH = "messagerie.db"
@@ -89,6 +97,27 @@ def add_message(sender_id, receiver_id, message):
     connexion.close()
 
 
+# Middleware: vérifie avant chaque requête
+@app.before_request
+def check_activity():
+    if "user_id" in session:
+        last = session.get("last_activity")
+        now = datetime.utcnow().timestamp()
+        if last and (now - last > INACTIVITY_TIMEOUT):
+            # Trop d'inactivité → déconnexion
+            session.clear()
+            return render_template("login.html", error="Session expirée pour cause d'inactivité")
+
+# Route appelée par le front pour signaler une activité
+@app.route("/activity", methods=["POST"])
+def update_activity():
+    if "user_id" not in session:
+        return jsonify({"status": "not_logged"}), 401
+
+    # Met à jour la dernière activité dans la session
+    session["last_activity"] = datetime.utcnow().timestamp()
+    return jsonify({"status": "ok"}), 200
+
 
 
 # FONCTIONS TOKEN - ajoutees
@@ -149,6 +178,7 @@ def login():
             # Sauvegarde info utilisateur dans session Flask
             session["user_id"] = user_id
             session["username"] = username
+            session["last_activity"] = datetime.utcnow().timestamp()
             return redirect(url_for("code_page"))
         else:
             return "Mot de passe incorrect"
@@ -254,6 +284,12 @@ def get_messages(peer_id):
 
     return jsonify([dict(r) for r in rows])
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    resp = make_response(redirect(url_for("login")))
+    resp.set_cookie("session", "", expires=0)  # force la suppression du cookie
+    return resp
 
 
 # )

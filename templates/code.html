@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Activation Session</title>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation Session</title>
+  <style>
         body { font-family: Arial, sans-serif; margin: 50px; }
         form { max-width: 400px; margin: auto; }
         input { display: block; margin: 10px 0; width: 100%; padding: 8px; }
@@ -11,15 +12,35 @@
     </style>
 </head>
 <body>
-    <h2>Activation de session sécurisée</h2>
-    <form method="POST">
-        <label>Nom du pair :</label>
-        <input type="text" name="peer" required>
-        <label>Votre code :</label>
-        <input type="text" name="user_code" required>
-        <label>Code du pair :</label>
-        <input type="text" name="peer_code" required>
-        <input type="submit" value="Démarrer la session">
+  <div class="container">
+    <h1>Activation d'une session de chat</h1>
+    <form method="POST" action="/code">
+      <label for="peer">Nom du pair :</label>
+      <input type="text" id="peer" name="peer" required>
+
+      <label for="user_code">Votre code secret :</label>
+      <input type="text" id="user_code" name="user_code" required>
+
+      <label for="peer_code">Code secret du pair :</label>
+      <input type="text" id="peer_code" name="peer_code" required>
+
+      <button type="submit">Activer la session</button>
     </form>
+
+    {% if session.get('code_error') %}
+      <p class="error">{{ session.get('code_error') }}</p>
+    {% endif %}
+
+    {% if session.get('code_success') %}
+      <p class="success">{{ session.get('code_success') }}</p>
+    {% endif %}
+
+    <p><a href="/logout" id="manual-logout">Se déconnecter</a></p>
+  </div>
+
+  <script src="{{ url_for('static', filename='activity.js') }}"></script>
+
+
+
 </body>
 </html>
