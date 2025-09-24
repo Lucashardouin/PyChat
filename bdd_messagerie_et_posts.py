@@ -58,8 +58,15 @@ def verify_user_code(user_id, code):
 def create_session(user1_id, user2_id, user1_code, user2_code):
     connexion = get_db()
     cursor = connexion.cursor()
+    
     # Tri des ID pour avoir une cle unique (peu importe l'ordre)
     key = tuple(sorted([user1_id, user2_id]))
+    
+    # Clé messages (même format que ta table messages)
+    session_key = f"{min(user1_id, user2_id)}-{max(user1_id, user2_id)}"
+    cursor.execute("DELETE FROM messages WHERE session_key=?", (session_key,))  
+
+    
     # Verifie si la session existe deja
     cursor.execute("SELECT id FROM sessions WHERE user1_id=? AND user2_id=?", key)
     if not cursor.fetchone():
