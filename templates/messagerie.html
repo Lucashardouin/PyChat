@@ -15,6 +15,11 @@
 <body
   data-current-user-id="{{ current_user_id }}"
   data-peer-id="{{ peer_id }}"
+
+  data-peer-name="{{ peer_name }}"
+  data-current-username="{{ current_username }}"
+
+  data-chat-token="{{ chat_token }}"  
 >
 
   <h2>Messagerie sécurisée</h2>
@@ -33,6 +38,10 @@
     // Récupération des IDs depuis les attributs HTML
     const currentUserId = Number(document.body.dataset.currentUserId);
     const peerId        = Number(document.body.dataset.peerId);
+    const peerName         = document.body.dataset.peerName;
+    const currentUsername  = document.body.dataset.currentUsername; //
+
+    const chatToken     = document.body.dataset.chatToken;  // TOKEN
 
     const chatDiv = document.getElementById("chat");
     const form    = document.getElementById("chatForm");
@@ -43,13 +52,13 @@
       chatDiv.innerHTML = "";
       messages.forEach(msg => {
         const p = document.createElement("p");
-        const fromId = parseInt(msg.from, 10); // ✅ conversion sûre
+        const fromId = parseInt(msg.from, 10); // conversion sûre
 
         if (fromId === currentUserId) {
             p.textContent = "Moi: " + msg.msg;
             p.className = "my-message";
         } else {
-            p.textContent = "- : " + msg.msg;
+            p.textContent = peerName + ": " + msg.msg;    
             p.className = "peer-message";
         }
 
@@ -59,7 +68,9 @@
     }
 
     function fetchMessages() {
-      fetch(`/get_messages/${peerId}`)
+      fetch(`/get_messages/${peerId}`, { // TOKEN 
+        headers: {'X-Chat-Token': chatToken  }
+        }) //
         .then(resp => resp.json())
         .then(messages => {
           console.log("currentUserId:", currentUserId, "peerId:", peerId, "messages:", messages);
@@ -80,7 +91,10 @@
 
       fetch(`/send_message/${peerId}`, {
         method: "POST",
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: {'Content-Type': 'application/x-www-form-urlencoded',
+          // TOKEN
+          'X-Chat-Token': chatToken  // 
+        },
         body: `message=${encodeURIComponent(messageText)}`
       })
       .then(() => {
