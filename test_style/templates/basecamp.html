@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ basecamp_name }} - NEXUS Terminal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="bg-effects">
+        <div class="grid-overlay"></div>
+        <div class="static-noise"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="system-title">{{ basecamp_name }}</h1>
+            <p class="system-subtitle">Secure Communication Channel // Code: {{ basecamp_code }}</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <span>Connection: SECURE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <span>User: {{ username }}</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator warning"></div>
+                <span>Base Camp: ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <div class="main-content basecamp-layout">
+            <!-- Online Users Sidebar -->
+            <div class="users-sidebar">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">ONLINE SURVIVORS</h3>
+                </div>
+                <div class="users-list" id="usersList">
+                    <!-- Users will be added dynamically -->
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="chat-area basecamp-chat">
+                <div class="chat-header">
+                    <div class="chat-title">Base Camp Communications</div>
+                    <div class="chat-status" id="chatStatus">⚡ Connected to secure channel</div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages will be added dynamically -->
+                </div>
+
+                <div class="input-area">
+                    <div class="input-controls">
+                        <textarea class="message-input" placeholder="Type your message..." rows="2" id="messageInput"></textarea>
+                        <div class="control-buttons">
+                            <button id="sendBtn" class="send-btn">SEND</button>
+                            <button id="endChatBtn" class="end-chat-btn">END CHAT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="connection-status" id="connectionStatus">
+        <div class="status-indicator online"></div>
+        <span>Connected to {{ basecamp_name }}</span>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        const username = '{{ username }}';
+        const basecampCode = '{{ basecamp_code }}';
+        const basecampName = '{{ basecamp_name }}';
+
+        // DOM elements
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const endChatBtn = document.getElementById('endChatBtn');
+        const usersList = document.getElementById('usersList');
+        const chatStatus = document.getElementById('chatStatus');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = `${timeString} PST`;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Add message to chat
+        function addMessage(sender, content, timestamp, type = 'normal') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            messageDiv.innerHTML = `
+                <div class="message-meta">[${sender}] - ${timestamp}</div>
+                <div class="message-content">${content}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Add system message
+        function addSystemMessage(content, timestamp) {
+            addMessage('SYSTEM', content, timestamp, 'system');
+        }
+
+        // Update online users list
+        function updateUsersList(users) {
+            usersList.innerHTML = '';
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'user-item';
+                userDiv.innerHTML = `
+                    <div class="user-status online"></div>
+                    <span class="user-name">${user.username}</span>
+                `;
+                usersList.appendChild(userDiv);
+            });
+
+            const count = users.length;
+            chatStatus.textContent = `⚡ ${count} survivor${count !== 1 ? 's' : ''} online in base camp`;
+        }
+
+        // Send message
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                socket.emit('send_message', { message: message });
+                messageInput.value = '';
+            }
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        endChatBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to end this chat session?')) {
+                fetch('/end_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/';
+                    }
+                });
+            }
+        });
+
+        // Socket.IO event handlers
+        socket.on('connect', function() {
+            console.log('Connected to server');
+            connectionStatus.innerHTML = `
+                <div class="status-indicator online"></div>
+                <span>Connected to ${basecampName}</span>
+            `;
+            socket.emit('get_online_users');
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Disconnected from server');
+            connectionStatus.innerHTML = `
+                <div class="status-indicator critical"></div>
+                <span>Connection lost - Attempting reconnect...</span>
+            `;
+        });
+
+        socket.on('system_message', function(data) {
+            addSystemMessage(data.message, data.timestamp);
+        });
+
+        socket.on('new_message', function(data) {
+            addMessage(data.username, data.message, data.timestamp);
+        });
+
+        socket.on('user_joined', function(data) {
+            addSystemMessage(data.message, data.timestamp);
+            socket.emit('get_online_users');
+        });
+
+        socket.on('user_left', function(data) {
+            addSystemMessage(data.message, data.timestamp);
+            socket.emit('get_online_users');
+        });
+
+        socket.on('online_users_update', function(data) {
+            updateUsersList(data.users);
+        });
+
+        // Initial system message
+        setTimeout(() => {
+            addSystemMessage(`Welcome to ${basecampName}. Secure communication established.`,
+                new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        }, 500);
+    </script>
+</body>
+</html>

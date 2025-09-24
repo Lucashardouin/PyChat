@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Terminal - Survivor Network</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-effects">
+        <div class="grid-overlay"></div>
+        <div class="static-noise"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="system-title">NEXUS TERMINAL</h1>
+            <p class="system-subtitle">Wasteland Communication Network // Sector 7-Alpha</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-indicator online"></div>
+                <span>Network: ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator warning"></div>
+                <span>Security: CAUTION</span>
+            </div>
+            <div class="status-item">
+                <div class="status-indicator critical"></div>
+                <span>Ultron Threat: HIGH</span>
+            </div>
+            <div class="status-item">
+                <span id="currentTime"></span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="login-panel" id="loginPanel">
+                <h2 class="login-title">SURVIVOR ACCESS</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" class="form-input" placeholder="Enter survivor ID..." required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter access code..." required>
+                    </div>
+                    <button type="submit" class="login-btn">CONNECT TO NETWORK</button>
+                </form>
+
+                <!-- Base Camp Access Panel (hidden initially) -->
+                <div id="basecampPanel" class="basecamp-panel" style="display: none;">
+                    <h3 class="basecamp-title">BASE CAMP ACCESS</h3>
+                    <p class="basecamp-subtitle">Enter base camp authorization code</p>
+                    <form id="basecampForm">
+                        <div class="form-group">
+                            <label class="form-label" for="basecampCode">Base Camp Code</label>
+                            <input type="text" id="basecampCode" class="form-input" placeholder="Enter base camp code..." required>
+                        </div>
+                        <button type="submit" class="login-btn">ACCESS BASE CAMP</button>
+                    </form>
+                    <button id="logoutBtn" class="logout-btn">DISCONNECT</button>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <div class="chat-title">Survivor Communications</div>
+                    <div class="chat-status">⚡ Awaiting authentication // Network initialization in progress</div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages will be added dynamically -->
+                </div>
+
+                <div class="input-area">
+                    <textarea class="message-input" placeholder="Enter message... (Authentication required)" rows="2" disabled id="messageInput"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-panel">
+        <div class="warning-title">⚠ SYSTEM ALERT</div>
+        <div class="warning-text">Unauthorized access attempts detected. Maintain operational security at all times.</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -68,9 +68,19 @@
         button:hover {
             background-color: #cc0000;
         }
+        .user-badge { position: fixed; top: 10px; right: 12px; font-family: Arial, sans-serif;
+                background: rgba(0,0,0,0.6); color:#fff; padding: 6px 10px; border-radius: 12px;
+                font-size: 12px; z-index: 9999; }
+        .user-badge a { color:#ffd1d1; text-decoration:none; margin-left:8px; }
     </style>
 </head>
 <body>
+    {% if current_username %}
+    <div class="user-badge">
+    Logged as {{ current_username }} <a href="/logout" title="Log out">Logout</a>
+    </div>
+    {% endif %}
+
     <div class="login-container">
         <h2>Signal Zero</h2>
         <form method="POST">
