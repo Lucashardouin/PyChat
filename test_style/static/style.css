@@ -11,7 +11,7 @@ body {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
     color: #00ff41;
     height: 100vh;
-    overflow: hidden;
+
     position: relative;
 }
 
@@ -392,6 +392,7 @@ body {
     border-top: 1px solid rgba(0, 255, 65, 0.3);
     background: rgba(0, 0, 0, 0.8);
     border-radius: 0 0 10px 10px;
+    width: 100%;
 }
 
 .input-controls {
@@ -411,6 +412,7 @@ body {
     resize: none;
     transition: all 0.3s ease;
     min-height: 50px;
+    width: 100%;
 }
 
 .message-input:focus {
@@ -477,7 +479,7 @@ body {
 
 /* Warning messages */
 .warning-panel {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     right: 20px;
     width: 300px;
