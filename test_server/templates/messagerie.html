@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Messagerie sécurisée</title>
+  <title>Secure Messaging</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     #chat { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; }
@@ -10,27 +11,43 @@
     #send { padding: 5px; }
     .my-message { color: blue; text-align: right; }
     .peer-message { color: green; text-align: left; }
+    .user-badge { position: fixed; top: 10px; right: 12px; font-family: Arial, sans-serif;
+                background: rgba(0,0,0,0.6); color:#fff; padding: 6px 10px; border-radius: 12px;
+                font-size: 12px; z-index: 9999; }
+    .user-badge a { color:#ffd1d1; text-decoration:none; margin-left:8px; }
   </style>
 </head>
 <body
+
   data-current-user-id="{{ current_user_id }}"
+  data-chat-id="{{ chat_id }}"
   data-peer-id="{{ peer_id }}"
   data-peer-name="{{ peer_name }}"
   data-current-username="{{ current_username }}"
   data-chat-token="{{ chat_token }}"
 >
-  <h2>Messagerie sécurisée</h2>
+  {% if current_username %}
+  <div class="user-badge">
+    Logged as {{ current_username }} <a href="/logout" title="Log out">Logout</a>
+  </div>
+  {% endif %}
+
+  <h2>Secure Messaging</h2>
+
   <div id="chat"></div>
+
   <form id="chatForm">
-    <input type="text" name="message" id="message" placeholder="Votre message">
-    <input type="submit" value="Envoyer" id="send">
+    <input type="text" name="message" id="message" placeholder="Your message">
+    <input type="submit" value="Send" id="send">
   </form>
+
   <script>
-    const currentUserId = Number(document.body.dataset.currentUserId);
-    const peerId        = Number(document.body.dataset.peerId);
-    const peerName      = document.body.dataset.peerName;
-    const currentUsername  = document.body.dataset.currentUsername;
-    const chatToken     = document.body.dataset.chatToken;
+    const currentUserId   = Number(document.body.dataset.currentUserId);
+    const chatId          = document.body.dataset.chatId;
+    const peerName        = document.body.dataset.peerName;
+    const currentUsername = document.body.dataset.currentUsername;
+    const chatToken       = document.body.dataset.chatToken;
+
     const chatDiv = document.getElementById("chat");
     const form    = document.getElementById("chatForm");
     const input   = document.getElementById("message");
@@ -41,7 +58,7 @@
         const p = document.createElement("p");
         const fromId = parseInt(msg.from, 10);
         if (fromId === currentUserId) {
-            p.textContent = "Moi: " + msg.msg;
+            p.textContent = "Me: " + msg.msg;
             p.className = "my-message";
         } else {
             p.textContent = peerName + ": " + msg.msg;
@@ -53,15 +70,15 @@
     }
 
     function fetchMessages() {
-      fetch(`/get_messages/${peerId}`, {
+      fetch(`/get_messages/${chatId}`, {
         headers: {'X-Chat-Token': chatToken}
       })
         .then(resp => resp.json())
         .then(messages => {
-          console.log("currentUserId:", currentUserId, "peerId:", peerId, "messages:", messages);
+          console.log("currentUserId:", currentUserId, "chatId:", chatId, "messages:", messages);
           renderMessages(messages);
         })
-        .catch(err => console.error("Erreur fetchMessages:", err));
+        .catch(err => console.error("fetchMessages error:", err));
     }
 
     setInterval(fetchMessages, 2000);
@@ -71,7 +88,7 @@
       e.preventDefault();
       const messageText = input.value.trim();
       if (!messageText) return;
-      fetch(`/send_message/${peerId}`, {
+      fetch(`/send_message/${chatId}`, {
         method: "POST",
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -80,7 +97,7 @@
         body: `message=${encodeURIComponent(messageText)}`
       })
       .then(() => { input.value = ""; fetchMessages(); })
-      .catch(err => console.error("Erreur envoi message:", err));
+      .catch(err => console.error("send error:", err));
     });
   </script>
 </body>
