@@ -22,6 +22,44 @@ else:
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# client joins a chat room
+@socketio.on("join_chat")
+def handle_join_chat(data):
+    user_id = current_user_from_token_or_session(expected_chat_id=data.get("chat_id"))
+    if not user_id: return
+    chat_id = data.get("chat_id")
+    join_room(chat_id)
+    # optional: send existing messages when joining
+    row = get_session_by_chat_id(chat_id)
+    if not row: return
+    u1, u2 = int(row["user1_id"]), int(row["user2_id"])
+    peer_id = u2 if user_id == u1 else u1
+    key = "-".join(map(str, sorted([user_id, peer_id])))
+    conn = get_db(); c = conn.cursor()
+    c.execute("""SELECT sender_id AS 'from', content AS msg
+                 FROM messages WHERE session_key=? ORDER BY timestamp ASC, id ASC""", (key,))
+    rows = [dict(r) for r in c.fetchall()]
+    conn.close()
+    emit("chat_history", rows)
+
+# send new message
+@socketio.on("send_message")
+def handle_send_message(data):
+    chat_id = data.get("chat_id")
+    msg_text = data.get("message")
+    if not msg_text or not chat_id: return
+    user_id = current_user_from_token_or_session(expected_chat_id=chat_id)
+    if not user_id: return
+    row = get_session_by_chat_id(chat_id)
+    if not row: return
+    u1, u2 = int(row["user1_id"]), int(row["user2_id"])
+    if user_id not in (u1, u2): return
+    peer_id = u2 if user_id == u1 else u1
+    add_message(user_id, peer_id, msg_text)
+    # broadcast to the room
+    emit("new_message", {"from": user_id, "msg": msg_text}, room=chat_id)
+
+
 @app.context_processor
 def inject_current_user():
     return {"current_username": session.get("username")}
