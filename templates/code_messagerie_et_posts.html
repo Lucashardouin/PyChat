@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accueil — Activer un chat / Posts</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:32px; align-items:start; }
+    h2 { margin: 0 0 12px; }
+    form { background:#f8f8f8; padding:16px; border-radius:8px; }
+    label { font-weight:600; display:block; margin-top:8px; }
+    input, textarea { width:100%; box-sizing:border-box; padding:10px; margin-top:6px; }
+    textarea { min-height:120px; resize:vertical; }
+    button, input[type="submit"] { margin-top:12px; padding:10px 14px; cursor:pointer; }
+    .card { background:#fff; border:1px solid #e6e6e6; border-radius:8px; }
+    .list { max-height:58vh; overflow-y:auto; padding:14px; }
+    .post { margin:8px 0; padding:8px; border:1px solid #eee; border-radius:6px; background:#fff; }
+    .meta { color:#666; font-size:12px; margin-left:6px; font-weight:400; }
+    .muted { color:#666; }
+    .error { color:#b00; margin: 8px 0 12px; }
+    summary { cursor:pointer; font-weight:600; outline:none; }
+    details > div { margin-top:8px; white-space:pre-wrap; }
+  </style>
+</head>
+<body>
+
+  <div class="grid">
+
+    <!-- Colonne gauche : activer une session de chat -->
+    <section>
+      <h2>Activation de session sécurisée</h2>
+      {% if error and error != 'Le contenu du post est vide.' %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+      <form method="POST" action="/code" class="card">
+        <label>Nom du pair</label>
+        <input type="text" name="peer" required />
+
+        <label>Votre code</label>
+        <input type="text" name="user_code" required />
+
+        <label>Code du pair</label>
+        <input type="text" name="peer_code" required />
+
+        <input type="submit" value="Démarrer la session" />
+      </form>
+    </section>
+
+    <!-- Colonne droite : fil de posts (titres cliquables) -->
+    <section>
+      <h2>Posts</h2>
+
+      {% if error == 'Le contenu du post est vide.' %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <div class="card list" id="postsList">
+        {% if posts and posts|length > 0 %}
+        {% for p in posts %}
+          <details class="post">
+            <summary>
+              {{ p.title or "(Sans titre)" }}
+              <span class="meta">— par {{ p.author or "?" }}, {{ p.created_at }}</span>
+            </summary>
+            <div>{{ p.content | e }}</div>
+            </details>
+            {% endfor %}
+         {% else %}
+    <div class="muted">Aucun post pour le moment.</div>
+  {% endif %}
+</div>
+
+
+      <form method="POST" action="/add_post" class="card" style="margin-top:16px;">
+        <input type="hidden" name="post_token" value="{{ post_token }}"> <!-- TOKEN POSTS -->
+        <label for="title">Titre</label>
+        <input id="title" name="title" type="text" placeholder="Titre du post (optionnel)" />
+
+        <label for="content">Votre message</label>
+        <textarea id="content" name="content" placeholder="Écrire un post…" required></textarea>
+
+        <button type="submit">Publier</button>
+      </form>
+    </section>
+
+  </div>
+ 
+
+<script>
+  // Rafraîchit uniquement la colonne "Posts" sans recharger toute la page.
+  const listEl = document.getElementById('postsList');
+
+  function renderPosts(posts) {
+    if (!Array.isArray(posts) || posts.length === 0) {
+      listEl.innerHTML = '<div class="muted">Aucun post pour le moment.</div>';
+      return;
+    }
+    // Reconstruit la liste (simple et fiable)
+    const frag = document.createDocumentFragment();
+    posts.forEach(p => {
+      const details = document.createElement('details');
+      details.className = 'post';
+      const summary = document.createElement('summary');
+      summary.innerHTML = `${p.title || '(Sans titre)'} <span class="meta">— par ${p.author || '?'
+        }, ${p.created_at}</span>`;
+      const body = document.createElement('div');
+      // échappement basique pour éviter l'injection (le back le fait déjà avec |e)
+      body.textContent = p.content || '';
+      details.appendChild(summary);
+      details.appendChild(body);
+      frag.appendChild(details);
+    });
+    listEl.innerHTML = '';
+    listEl.appendChild(frag);
+  }
+
+  async function fetchAndRenderPosts() {
+    // Ne pas rafraîchir si l’utilisateur est en train de taper dans un champ
+    const el = document.activeElement;
+    const typing = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+    if (typing) return;
+
+    // Ne pas rafraîchir si un post est ouvert
+    if (listEl.querySelector('details.post[open]')) return;
+
+    try {
+      const resp = await fetch('/api/posts', { credentials: 'same-origin' });
+      if (!resp.ok) return; // pas connecté -> on ne fait rien
+      const posts = await resp.json();
+      renderPosts(posts);
+    } catch (_) {
+      // silencieux
+    }
+  }
+
+  //  Rafraîchissement périodique léger
+  fetchAndRenderPosts();
+  setInterval(fetchAndRenderPosts, 2000); // toutes les 2s
+</script>
+
+
+</body>
+</html>
