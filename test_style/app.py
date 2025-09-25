@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, make_response, redirect, url_for
 from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 import json
 import hashlib
 from datetime import datetime
 import db
+import closing_session
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'nexus_terminal_2087_secret_key'
@@ -38,7 +39,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=["GET","POST"])
 def login():
     data = request.get_json()
     username = data.get('username')
@@ -47,6 +48,7 @@ def login():
     if verify_user(username, password):
         session['username'] = username
         session['authenticated'] = True
+        session["last_activity"] = datetime.utcnow().timestamp()
         return jsonify({'success': True, 'message': f'Welcome back, {username}'})
     else:
         return jsonify({'success': False, 'message': 'Invalid credentials. Access denied.'})
@@ -86,6 +88,8 @@ def basecamp():
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
+    resp = make_response(redirect(url_for("login")))
+    resp.set_cookie("session", "", expires=0)
     return jsonify({'success': True, 'message': 'Disconnected from network'})
 
 

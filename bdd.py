@@ -14,18 +14,18 @@ from flask.sessions import SecureCookieSessionInterface
 app = Flask(__name__)
 
 # Cle secrete Flask pour les sessions
-app.secret_key = "key"
+app.secret_key = utils.random(secret.SecretBox.KEY_SIZE)
 
-cookie_value = "eyJsYXN0X2FjdGl2aXR5IjoxNzU4NzE2NjUxLjQ1MjQzMywidXNlcl9pZCI6NSwidXNlcm5hbWUiOiJvdWlvdWkifQ.aNP_Cw.acJkJTVUc5qQKMZVIDF3pnM5els" 
-s = SecureCookieSessionInterface().get_signing_serializer(app)
-if s is None:
-    print("Erreur : impossible d'obtenir le serializer.")
-else:
-    try:
-        data = s.loads(cookie_value)
-        print("Cookie décodé :", data)
-    except Exception as e:
-        print("Impossible de décoder le cookie :", str(e))
+# cookie_value = "eyJsYXN0X2FjdGl2aXR5IjoxNzU4NzE2NjUxLjQ1MjQzMywidXNlcl9pZCI6NSwidXNlcm5hbWUiOiJvdWlvdWkifQ.aNP_Cw.acJkJTVUc5qQKMZVIDF3pnM5els" 
+# s = SecureCookieSessionInterface().get_signing_serializer(app)
+# if s is None:
+#     print("Erreur : impossible d'obtenir le serializer.")
+# else:
+#     try:
+#         data = s.loads(cookie_value)
+#         print("Cookie décodé :", data)
+#     except Exception as e:
+#         print("Impossible de décoder le cookie :", str(e))
 
 # Cookie de session non permanent → disparaît à la fermeture de l’onglet
 app.config["SESSION_PERMANENT"] = False
