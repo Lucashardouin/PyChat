@@ -1,5 +1,5 @@
 let inactivityTimer;
-const logoutAfter = 10 * 1000; // 10 secondes pour test
+const logoutAfter = 60 * 10 * 1000; // 10 secondes pour test
 
 let activityTimer;
 
@@ -7,7 +7,7 @@ let activityTimer;
 function logoutAndRedirect() {
     fetch("/logout", { method: "POST" })
         .finally(() => {
-            window.location.href = "/login"; // redirection vers login
+            window.location.href = "/"; // redirection vers login
         });
 }
 

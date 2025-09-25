@@ -9,12 +9,12 @@ from flask.sessions import SecureCookieSessionInterface
 import db
 import app
 
-
+app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 
 # Timeout d’inactivité (ex: 10 min)
 
-INACTIVITY_TIMEOUT = 15 
+INACTIVITY_TIMEOUT = 300
 
 
 app.secret_key = utils.random(secret.SecretBox.KEY_SIZE)
@@ -29,7 +29,7 @@ def check_activity():
         if last and (now - last > INACTIVITY_TIMEOUT):
             # Trop d'inactivité → déconnexion
             session.clear()
-            return render_template("login.html", error="Session expirée pour cause d'inactivité")
+            return render_template("index.html", error="Session expirée pour cause d'inactivité")
 
 # Route appelée par le front pour signaler une activité
 @app.route("/activity", methods=["POST"])
