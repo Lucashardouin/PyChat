@@ -740,9 +740,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='inactivity.js') }}"></script>
-    <script src="{{ url_for('static', filename='logout.js') }}"></script>
-
     <script>
         // Initialize Socket.IO connection
         const socket = io();
@@ -1003,28 +1000,29 @@
 
                 // Add message to private chat
                 const messageDiv = document.createElement('div');
-                messageDiv.className = 'private-message';
+                messageDiv.className = 'private-message sent';
                 messageDiv.innerHTML = `
                     <div style="color: #ff6b35; font-size: 0.7rem; margin-bottom: 2px;">
-                        You → ${selectedPrivateUser} <span style="color: #666;">✓</span>
+                        You → ${selectedPrivateUser}
                     </div>
                     <div>${message}</div>
+                    <div class="message-status">sent</div>
                 `;
                 privateMessages.appendChild(messageDiv);
                 privateMessages.scrollTop = privateMessages.scrollHeight;
 
                 this.value = '';
 
-                // Simulate response with read receipt
+                // Simulate response
                 setTimeout(() => {
-                    // Mark previous message as read
-                    const lastMessage = privateMessages.lastElementChild;
-                    if (lastMessage) {
-                        lastMessage.classList.add('read');
-                    }
-
                     const responseDiv = document.createElement('div');
-                    responseDiv.className = 'private-message';
+                    responseDiv.className = 'private-message received';
+                    responseDiv.innerHTML = `
+                        <div style="color: #00ff41; font-size: 0.7rem; margin-bottom: 2px;">
+                            ${selectedPrivateUser} → You
+                        </div>
+                        <div>Message received. Standing by for further instructions.</div>
+                    `;
                     privateMessages.appendChild(responseDiv);
                     privateMessages.scrollTop = privateMessages.scrollHeight;
                 }, 2000);
@@ -1126,4 +1124,3 @@
     </script>
 </body>
 </html>
-
