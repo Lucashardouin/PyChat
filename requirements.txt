@@ -2,7 +2,6 @@ flask
 flask-socketio
 flask-cors
 pynacl
-streamlit
 json
 html
 argon2
