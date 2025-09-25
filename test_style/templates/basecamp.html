@@ -194,6 +194,23 @@
             background: rgba(0, 0, 0, 0.4);
             border-left: 2px solid #ff6b35;
             border-radius: 0 3px 3px 0;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        .private-message.read {
+            border-left-color: #666;
+            opacity: 0.8;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .private-input {
@@ -201,6 +218,7 @@
             border-top: 1px solid rgba(0, 255, 65, 0.3);
             background: rgba(0, 0, 0, 0.8);
             border-radius: 0 0 10px 10px;
+            position: relative;
         }
 
         .private-input input {
@@ -211,6 +229,20 @@
             border-radius: 3px;
             color: #00ff41;
             font-size: 0.8rem;
+        }
+
+        .typing-indicator {
+            position: absolute;
+            top: -15px;
+            left: 10px;
+            font-size: 0.7rem;
+            color: #888;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .typing-indicator.visible {
+            opacity: 1;
         }
 
         /* Online survivors - 60% of left column */
@@ -250,6 +282,7 @@
             border-bottom: 1px solid rgba(0, 255, 65, 0.1);
             cursor: pointer;
             transition: background 0.3s ease;
+            position: relative;
         }
 
         .user-item:hover {
@@ -266,6 +299,69 @@
         .user-name {
             color: #00ff41;
             font-size: 0.8rem;
+        }
+
+        .user-info {
+            flex: 1;
+            margin-left: 8px;
+        }
+
+        .user-details {
+            font-size: 0.6rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .user-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 8px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 8px 10px;
+            min-width: 120px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
+
+        .user-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #00ff41;
+        }
+
+        .user-item:hover .user-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .tooltip-content {
+            font-size: 0.7rem;
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .tooltip-label {
+            color: #ff6b35;
+        }
+
+        .tooltip-value {
+            color: #00ff41;
         }
 
         /* Middle column - 50% */
@@ -311,12 +407,14 @@
             border: 1px solid rgba(0, 255, 65, 0.2);
             border-radius: 8px;
             animation: postAppear 0.5s ease-out;
+            position: relative;
         }
 
         .post-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
+            align-items: center;
         }
 
         .post-author {
@@ -363,6 +461,41 @@
             border: 1px solid #00ff41;
         }
 
+        .post-reactions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .reaction-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            color: #00ff41;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .reaction-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            border-color: #00ff41;
+        }
+
+        .reaction-btn.active {
+            background: rgba(0, 255, 65, 0.2);
+            border-color: #00ff41;
+        }
+
+        .reaction-count {
+            font-size: 0.6rem;
+        }
+
         @keyframes postAppear {
             from {
                 opacity: 0;
@@ -374,64 +507,6 @@
             }
         }
 
-        /* Right column - 25% */
-        .right-column {
-            width: 25%;
-            background: rgba(0, 0, 0, 0.6);
-            border: 2px solid rgba(255, 68, 68, 0.5);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(5px);
-        }
-
-        .system-header {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 15px;
-            border-bottom: 1px solid rgba(255, 68, 68, 0.3);
-            border-radius: 10px 10px 0 0;
-        }
-
-        .system-header-title {
-            color: #ff4444;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        .system-alerts {
-            flex: 1;
-            padding: 10px;
-            overflow-y: auto;
-        }
-
-        .system-alert {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            background: rgba(255, 68, 68, 0.1);
-            border-left: 3px solid #ff4444;
-            border-radius: 0 5px 5px 0;
-            animation: alertPulse 2s infinite;
-        }
-
-        .alert-time {
-            color: #ff6b35;
-            font-size: 0.7rem;
-            margin-bottom: 4px;
-        }
-
-        .alert-message {
-            color: #ffaaaa;
-            font-size: 0.8rem;
-            line-height: 1.3;
-        }
-
-        @keyframes alertPulse {
-            0%, 100% { border-left-color: #ff4444; }
-            50% { border-left-color: #ff6666; }
-        }
-
-        /* Control buttons */
         .post-input-area {
             padding: 15px 20px;
             border-top: 1px solid rgba(0, 255, 65, 0.3);
@@ -492,6 +567,63 @@
             background: #666;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Right column - 25% */
+        .right-column {
+            width: 25%;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 68, 68, 0.5);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .system-header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 68, 68, 0.3);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .system-header-title {
+            color: #ff4444;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .system-alerts {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .system-alert {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: rgba(255, 68, 68, 0.1);
+            border-left: 3px solid #ff4444;
+            border-radius: 0 5px 5px 0;
+            animation: alertPulse 2s infinite;
+        }
+
+        .alert-time {
+            color: #ff6b35;
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+        }
+
+        .alert-message {
+            color: #ffaaaa;
+            font-size: 0.8rem;
+            line-height: 1.3;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { border-left-color: #ff4444; }
+            50% { border-left-color: #ff6666; }
         }
 
         /* Scrollbar styling */
@@ -557,6 +689,7 @@
                         </div>
                     </div>
                     <div class="private-input">
+                        <div class="typing-indicator" id="typingIndicator">User is typing...</div>
                         <input type="text" id="privateInput" placeholder="Select a survivor first..." disabled>
                     </div>
                 </div>
@@ -583,7 +716,7 @@
                     <!-- Camp posts will be added here -->
                 </div>
 
-                <!-- Post Input Area (visible to all, but restricted message for non-commanders) -->
+                <!-- Post Input Area -->
                 <div class="post-input-area" id="postInputArea">
                     <div class="post-form">
                         <textarea class="post-input" id="postInput" placeholder="Write your message to the base camp..."></textarea>
@@ -615,6 +748,8 @@
         const basecampName = '{{ basecamp_name }}';
 
         let selectedPrivateUser = null;
+        let typingTimer = null;
+        let messageTimestamps = new Map();
 
         // DOM elements
         const usersList = document.getElementById('usersList');
@@ -622,12 +757,13 @@
         const campPosts = document.getElementById('campPosts');
         const privateMessages = document.getElementById('privateMessages');
         const privateInput = document.getElementById('privateInput');
+        const typingIndicator = document.getElementById('typingIndicator');
         const postInputArea = document.getElementById('postInputArea');
         const postInput = document.getElementById('postInput');
         const postBtn = document.getElementById('postBtn');
 
         // Check if user can post (commander or lobby role)
-        const userRole = '{{ username }}' === 'PHOENIX-1' ? 'commander' : 'survivor'; // Simplified role check
+        const userRole = '{{ username }}' === 'PHOENIX-1' ? 'commander' : 'survivor';
         const canPost = userRole === 'commander' || '{{ username }}'.toLowerCase().includes('lobby');
 
         // Always show post input area but adjust functionality based on role
@@ -652,6 +788,32 @@
         updateTime();
         setInterval(updateTime, 1000);
 
+        // Update relative timestamps
+        function updateRelativeTimestamps() {
+            document.querySelectorAll('.post-time').forEach(timeElement => {
+                const postId = timeElement.getAttribute('data-post-id');
+                if (postId && messageTimestamps.has(postId)) {
+                    const timestamp = messageTimestamps.get(postId);
+                    timeElement.textContent = getRelativeTime(timestamp);
+                }
+            });
+        }
+
+        // Get relative time
+        function getRelativeTime(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+
+            if (minutes < 1) return 'now';
+            if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''} ago`;
+            if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+            return `${Math.floor(hours / 24)} day${Math.floor(hours / 24) !== 1 ? 's' : ''} ago`;
+        }
+
+        setInterval(updateRelativeTimestamps, 60000); // Update every minute
+
         // Add system alert
         function addSystemAlert(message) {
             const now = new Date();
@@ -673,15 +835,25 @@
             systemAlerts.scrollTop = 0;
         }
 
-        // Update online users list
+        // Update online users list with profiles
         function updateUsersList(users) {
             usersList.innerHTML = '';
             users.forEach(user => {
                 const userDiv = document.createElement('div');
                 userDiv.className = 'user-item';
+
+                // Mock user data (in real app, this would come from server)
+                const joinDate = user.username === 'PHOENIX-1' ? '2087-03-10' :
+                                user.username === 'RAVEN-2' ? '2087-03-18' : '2087-03-20';
+                const role = user.username === 'PHOENIX-1' ? 'COMMANDER' : 'SURVIVOR';
+                const lastSeen = 'Online';
+
                 userDiv.innerHTML = `
                     <div class="user-status online"></div>
-                    <span class="user-name">${user.username}</span>
+                    <div class="user-info">
+                        <span class="user-name">${user.username}</span>
+                        <div class="user-details">${role}</div>
+                    </div>
                 `;
 
                 // Add click handler for private chat
@@ -701,6 +873,9 @@
 
                         // Update private chat header
                         document.querySelector('.private-chat-title').textContent = `PRIVATE CHAT - ${user.username}`;
+
+                        // Load private message history (simulate)
+                        loadPrivateMessageHistory(user.username);
                     });
                 }
 
@@ -708,66 +883,117 @@
             });
         }
 
-        // Initialize camp posts
+        // Load private message history
+        function loadPrivateMessageHistory(targetUser) {
+            privateMessages.innerHTML = `
+                <div style="color: #888; text-align: center; margin: 10px 0; font-size: 0.7rem;">
+                    --- Secure channel with ${targetUser} ---
+                </div>
+            `;
+        }
+
+        // Initialize camp posts with chronological order (newest first)
         function initializeCampPosts() {
             const posts = [
                 {
-                    author: 'PHOENIX-1',
-                    time: '2 hours ago',
-                    priority: 'high',
-                    content: '🔫 Weapons training session scheduled at 17:00 in the main courtyard. All survivors required to attend. Bring your assigned firearms.'
-                },
-                {
-                    author: 'SHADOW-5',
-                    time: '4 hours ago',
+                    author: 'RAVEN-2',
+                    time: Date.now() - 43200000, // 12 hours ago
                     priority: 'medium',
-                    content: '🏢 Team meeting in the lobby at 14:30 to discuss patrol routes and supply runs. Medical team reports needed.'
-                },
-                {
-                    author: 'VIPER-3',
-                    time: '6 hours ago',
-                    priority: 'low',
-                    content: '🍽️ Kitchen duty roster updated. Check the bulletin board for your assigned shifts. Remember: conserve water usage.'
+                    content: '📡 Communications equipment maintenance scheduled for tomorrow 09:00. Expect brief network interruptions during testing.'
                 },
                 {
                     author: 'GHOST-7',
-                    time: '8 hours ago',
+                    time: Date.now() - 28800000, // 8 hours ago
                     priority: 'high',
                     content: '⚠️ Perimeter breach detected in Section C-4. All patrols exercise extreme caution. Report any unusual activity immediately.'
                 },
                 {
-                    author: 'RAVEN-2',
-                    time: '12 hours ago',
+                    author: 'VIPER-3',
+                    time: Date.now() - 21600000, // 6 hours ago
+                    priority: 'low',
+                    content: '🍽️ Kitchen duty roster updated. Check the bulletin board for your assigned shifts. Remember: conserve water usage.'
+                },
+                {
+                    author: 'SHADOW-5',
+                    time: Date.now() - 14400000, // 4 hours ago
                     priority: 'medium',
-                    content: '📡 Communications equipment maintenance scheduled for tomorrow 09:00. Expect brief network interruptions during testing.'
+                    content: '🏢 Team meeting in the lobby at 14:30 to discuss patrol routes and supply runs. Medical team reports needed.'
+                },
+                {
+                    author: 'PHOENIX-1',
+                    time: Date.now() - 7200000, // 2 hours ago
+                    priority: 'high',
+                    content: '🔫 Weapons training session scheduled at 17:00 in the main courtyard. All survivors required to attend. Bring your assigned firearms.'
                 }
             ];
 
+            // Add posts in chronological order (oldest first, newest will be at top)
             posts.forEach(post => {
                 addCampPost(post.author, post.content, post.priority, post.time);
             });
         }
 
-        // Add camp post
-        function addCampPost(author, content, priority = 'low', time = 'now') {
+        // Add camp post with improved functionality
+        function addCampPost(author, content, priority = 'medium', timestamp = Date.now()) {
+            const postId = 'post_' + Date.now() + Math.random();
+            messageTimestamps.set(postId, timestamp);
+
             const postDiv = document.createElement('div');
             postDiv.className = 'camp-post';
+            postDiv.setAttribute('data-post-id', postId);
 
             postDiv.innerHTML = `
                 <div class="post-header">
                     <span class="post-author">${author}</span>
-                    <span class="post-time">${time}</span>
+                    <span class="post-time" data-post-id="${postId}">${getRelativeTime(timestamp)}</span>
                 </div>
                 <div class="post-priority priority-${priority}">
                     ${priority.toUpperCase()} PRIORITY
                 </div>
                 <div class="post-content">${content}</div>
+                <div class="post-reactions">
+                    <button class="reaction-btn" onclick="toggleReaction('${postId}', 'acknowledge')">
+                        ✓ <span class="reaction-count" id="${postId}_acknowledge">0</span>
+                    </button>
+                    <button class="reaction-btn" onclick="toggleReaction('${postId}', 'important')">
+                        ⚠ <span class="reaction-count" id="${postId}_important">0</span>
+                    </button>
+                    <button class="reaction-btn" onclick="toggleReaction('${postId}', 'noted')">
+                        📝 <span class="reaction-count" id="${postId}_noted">0</span>
+                    </button>
+                </div>
             `;
 
+            // Insert at top for chronological order (newest first)
             campPosts.insertBefore(postDiv, campPosts.firstChild);
         }
 
-        // Handle private chat input
+        // Toggle reactions
+        function toggleReaction(postId, reactionType) {
+            const reactionElement = document.getElementById(`${postId}_${reactionType}`);
+            const btn = reactionElement.parentElement;
+
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+                reactionElement.textContent = parseInt(reactionElement.textContent) - 1;
+            } else {
+                btn.classList.add('active');
+                reactionElement.textContent = parseInt(reactionElement.textContent) + 1;
+            }
+        }
+
+        // Handle private chat input with typing indicators
+        privateInput.addEventListener('input', function() {
+            if (selectedPrivateUser) {
+                // Simulate typing indicator for other user
+                clearTimeout(typingTimer);
+
+                typingTimer = setTimeout(() => {
+                    // Hide typing indicator after 2 seconds of no typing
+                }, 2000);
+            }
+        });
+
         privateInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && selectedPrivateUser && this.value.trim()) {
                 const message = this.value.trim();
@@ -776,7 +1002,9 @@
                 const messageDiv = document.createElement('div');
                 messageDiv.className = 'private-message';
                 messageDiv.innerHTML = `
-                    <div style="color: #ff6b35; font-size: 0.7rem; margin-bottom: 2px;">You → ${selectedPrivateUser}</div>
+                    <div style="color: #ff6b35; font-size: 0.7rem; margin-bottom: 2px;">
+                        You → ${selectedPrivateUser} <span style="color: #666;">✓</span>
+                    </div>
                     <div>${message}</div>
                 `;
                 privateMessages.appendChild(messageDiv);
@@ -784,12 +1012,20 @@
 
                 this.value = '';
 
-                // Simulate response (in real implementation, this would be handled by socket)
+                // Simulate response with read receipt
                 setTimeout(() => {
+                    // Mark previous message as read
+                    const lastMessage = privateMessages.lastElementChild;
+                    if (lastMessage) {
+                        lastMessage.classList.add('read');
+                    }
+
                     const responseDiv = document.createElement('div');
                     responseDiv.className = 'private-message';
                     responseDiv.innerHTML = `
-                        <div style="color: #00ff41; font-size: 0.7rem; margin-bottom: 2px;">${selectedPrivateUser} → You</div>
+                        <div style="color: #00ff41; font-size: 0.7rem; margin-bottom: 2px;">
+                            ${selectedPrivateUser} → You
+                        </div>
                         <div>Message received. Standing by for further instructions.</div>
                     `;
                     privateMessages.appendChild(responseDiv);
@@ -806,15 +1042,8 @@
                 if (content) {
                     // Simulate automatic approval for commanders
                     if (canPost) {
-                        const now = new Date();
-                        const timeString = now.toLocaleTimeString('en-US', {
-                            hour12: false,
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-
                         // Add the post immediately (auto-approved) with medium priority as default
-                        addCampPost(username, content, 'medium', 'now');
+                        addCampPost(username, content, 'medium', Date.now());
 
                         // Add system alert about approval
                         setTimeout(() => {
@@ -864,7 +1093,7 @@
             updateUsersList(data.users);
         });
 
-        // Initialize the interface
+        // Initialize the interface with pre-loaded content
         addSystemAlert('Alpha Base Camp systems online. Welcome survivor.');
         addSystemAlert('All communications are encrypted and monitored for security.');
         addSystemAlert('Perimeter sensors active. No unusual activity detected.');
@@ -887,7 +1116,7 @@
             'Waste disposal systems require maintenance attention.'
         ];
 
-        // Add random system alert every 30-60 seconds
+        // Add random system alert every 45-60 seconds
         setInterval(() => {
             if (Math.random() > 0.6) {
                 const randomAlert = randomSystemAlerts[Math.floor(Math.random() * randomSystemAlerts.length)];
@@ -895,6 +1124,7 @@
             }
         }, 45000);
 
+        // Initialize camp posts
         initializeCampPosts();
     </script>
 </body>
