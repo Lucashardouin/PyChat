@@ -41,7 +41,10 @@
     <input type="submit" value="Send" id="send">
   </form>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
   <script>
+    const socket = io();
+
     const currentUserId   = Number(document.body.dataset.currentUserId);
     const chatId          = document.body.dataset.chatId;
     const peerName        = document.body.dataset.peerName;
@@ -52,53 +55,84 @@
     const form    = document.getElementById("chatForm");
     const input   = document.getElementById("message");
 
-    function renderMessages(messages) {
-      chatDiv.innerHTML = "";
-      messages.forEach(msg => {
-        const p = document.createElement("p");
-        const fromId = parseInt(msg.from, 10);
-        if (fromId === currentUserId) {
-            p.textContent = "Me: " + msg.msg;
-            p.className = "my-message";
-        } else {
-            p.textContent = peerName + ": " + msg.msg;
-            p.className = "peer-message";
-        }
-        chatDiv.appendChild(p);
-      });
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    }
+    socket.on("connect", () => {
+      socket.emit("join_chat", {chat_id: chatId});
+    })
 
-    function fetchMessages() {
-      fetch(`/get_messages/${chatId}`, {
-        headers: {'X-Chat-Token': chatToken}
-      })
-        .then(resp => resp.json())
-        .then(messages => {
-          console.log("currentUserId:", currentUserId, "chatId:", chatId, "messages:", messages);
-          renderMessages(messages);
-        })
-        .catch(err => console.error("fetchMessages error:", err));
-    }
+    socket.on("chat_history", messages => {
+    renderMessages(messages);
+  });
 
-    setInterval(fetchMessages, 2000);
-    fetchMessages();
+  socket.on("new_message", data => {
+    renderMessages([data]); // append single new message
+  });
 
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-      const messageText = input.value.trim();
-      if (!messageText) return;
-      fetch(`/send_message/${chatId}`, {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Chat-Token': chatToken
-        },
-        body: `message=${encodeURIComponent(messageText)}`
-      })
-      .then(() => { input.value = ""; fetchMessages(); })
-      .catch(err => console.error("send error:", err));
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const messageText = input.value.trim();
+    if (!messageText) return;
+    socket.emit("send_message", {chat_id: chatId, message: messageText});
+    input.value = "";
+  });
+
+  function renderMessages(messages) {
+    messages.forEach(msg => {
+      const p = document.createElement("p");
+      const fromId = parseInt(msg.from, 10);
+      p.textContent = (fromId === currentUserId ? "Me: " : peerName + ": ") + msg.msg;
+      p.className = (fromId === currentUserId ? "my-message" : "peer-message");
+      chatDiv.appendChild(p);
     });
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+  }
+
+    // function renderMessages(messages) {
+    //   chatDiv.innerHTML = "";
+    //   messages.forEach(msg => {
+    //     const p = document.createElement("p");
+    //     const fromId = parseInt(msg.from, 10);
+    //     if (fromId === currentUserId) {
+    //         p.textContent = "Me: " + msg.msg;
+    //         p.className = "my-message";
+    //     } else {
+    //         p.textContent = peerName + ": " + msg.msg;
+    //         p.className = "peer-message";
+    //     }
+    //     chatDiv.appendChild(p);
+    //   });
+    //   chatDiv.scrollTop = chatDiv.scrollHeight;
+    // }
+
+    // function fetchMessages() {
+    //   fetch(`/get_messages/${chatId}`, {
+    //     headers: {'X-Chat-Token': chatToken}
+    //   })
+    //     .then(resp => resp.json())
+    //     .then(messages => {
+    //       console.log("currentUserId:", currentUserId, "chatId:", chatId, "messages:", messages);
+    //       renderMessages(messages);
+    //     })
+    //     .catch(err => console.error("fetchMessages error:", err));
+    // }
+
+    // setInterval(fetchMessages, 2000);
+    // fetchMessages();
+
+    // form.addEventListener("submit", e => {
+    //   e.preventDefault();
+    //   const messageText = input.value.trim();
+    //   if (!messageText) return;
+    //   fetch(`/send_message/${chatId}`, {
+    //     method: "POST",
+    //     headers: {
+    //       'Content-Type': 'application/x-www-form-urlencoded',
+    //       'X-Chat-Token': chatToken
+    //     },
+    //     body: `message=${encodeURIComponent(messageText)}`
+    //   })
+    //   .then(() => { input.value = ""; fetchMessages(); })
+    //   .catch(err => console.error("send error:", err));
+    // });
   </script>
 </body>
 </html>

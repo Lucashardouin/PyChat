@@ -42,23 +42,22 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label class="form-label" for="username">Username</label>
-                        <input type="text" id="username" class="form-input" placeholder="Enter survivor ID..." required>
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter survivor ID..." required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" class="form-input" placeholder="Enter access code..." required>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter access code..." required>
                     </div>
                     <button type="submit" class="login-btn">CONNECT TO NETWORK</button>
                 </form>
 
-                <!-- Base Camp Access Panel (hidden initially) -->
                 <div id="basecampPanel" class="basecamp-panel" style="display: none;">
                     <h3 class="basecamp-title">BASE CAMP ACCESS</h3>
                     <p class="basecamp-subtitle">Enter base camp authorization code</p>
                     <form id="basecampForm">
                         <div class="form-group">
                             <label class="form-label" for="basecampCode">Base Camp Code</label>
-                            <input type="text" id="basecampCode" class="form-input" placeholder="Enter base camp code..." required>
+                            <input type="text" id="basecampCode" name="basecampCode" class="form-input" placeholder="Enter base camp code..." required>
                         </div>
                         <button type="submit" class="login-btn">ACCESS BASE CAMP</button>
                     </form>
