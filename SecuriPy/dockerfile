@@ -1,0 +1,23 @@
+# use python 3.11
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        python3-dev \
+        && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade pip setuptools wheel
+
+
+# copy all files to container
+COPY . /app
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# expose port
+EXPOSE 5000
+
+# start server
+CMD ["python", "app.py"]
