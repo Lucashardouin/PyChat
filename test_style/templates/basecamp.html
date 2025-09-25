@@ -1022,12 +1022,6 @@
 
                     const responseDiv = document.createElement('div');
                     responseDiv.className = 'private-message';
-                    responseDiv.innerHTML = `
-                        <div style="color: #00ff41; font-size: 0.7rem; margin-bottom: 2px;">
-                            ${selectedPrivateUser} → You
-                        </div>
-                        <div>Message received. Standing by for further instructions.</div>
-                    `;
                     privateMessages.appendChild(responseDiv);
                     privateMessages.scrollTop = privateMessages.scrollHeight;
                 }, 2000);
@@ -1129,3 +1123,4 @@
     </script>
 </body>
 </html>
+
