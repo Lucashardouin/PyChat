@@ -1,0 +1,7 @@
+{
+  "alpha": {
+    "name": "Alpha Base Camp - Sector 7",
+    "scheme": "argon2",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$0VHfbxh/BW1Pvhd8dZdPKQ$ppcksVwQfOXcSAgQDt6g64vqAgdEKEcPbviqMhpz16U"
+  }
+}
