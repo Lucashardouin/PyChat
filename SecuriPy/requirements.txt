@@ -1,0 +1,11 @@
+argon2-cffi>=23.1.0
+flask
+flask-socketio
+flask-cors
+pynacl
+html
+argon2
+time
+os
+base64
+secrets

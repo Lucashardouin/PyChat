@@ -1,0 +1,37 @@
+{
+  "GHOST-7": {
+    "role": "survivor",
+    "joined": "2087-03-15",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$WPSX67cNvayj9bwQU6j6cQ$qpmSFviw6UewLsK7m8ZjgYLsQXNrF3DLZyu1TLBbIy0",
+    "scheme": "argon2"
+  },
+  "RAVEN-2": {
+    "role": "survivor",
+    "joined": "2087-03-18",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$cX8WL02NNOj6pdn002e+Kw$idoslhUcAQbnIkhgb5pYkFwDiUi4OebLzkq7OxGtzjQ",
+    "scheme": "argon2"
+  },
+  "PHOENIX-1": {
+    "role": "commander",
+    "joined": "2087-03-10",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$SykHVVqB4JxKtbWG83U73Q$63KUlTWJ5uYwxhb03iSUhn3x8rOPwU4121OiS1YIjZ4",
+    "scheme": "argon2"
+  },
+  "SHADOW-5": {
+    "role": "survivor",
+    "joined": "2087-03-20",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$Ok8x8pfVXKbGBzZIUA6qiQ$EaUlqNlBgRvO8seUVFdDRKC5lE/AGuR00c7cKqSgcxs",
+    "scheme": "argon2"
+  },
+  "VIPER-3": {
+    "role": "survivor",
+    "joined": "2087-03-22",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$OG0Tk9yjxtWph4+e6sDxag$Anblz5neObYto0YrpMYKL/V26aVxroVaFj0wJlAXdfM",
+    "scheme": "argon2"
+  },
+  "EAGLE-8": {
+    "role": "survivor",
+    "scheme": "argon2",
+    "hash": "$argon2id$v=19$m=65536,t=3,p=4$m1dDLHBAa8V8RSFDe7WC1w$alNNnX5jNiXqNlZuG6yKOTXBK4HKcse8sLvi7OkSLsY"
+  }
+}
