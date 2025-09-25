@@ -11,7 +11,7 @@ body {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
     color: #00ff41;
     height: 100vh;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: relative;
 }
 
@@ -320,6 +320,7 @@ body {
     display: flex;
     flex-direction: column;
     backdrop-filter: blur(5px);
+    overflow-y: auto; 
 }
 
 .basecamp-chat {
@@ -477,7 +478,7 @@ body {
 
 /* Warning messages */
 .warning-panel {
-    position: absolute;
+    position: fix;
     bottom: 20px;
     right: 20px;
     width: 300px;

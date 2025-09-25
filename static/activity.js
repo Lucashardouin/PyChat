@@ -1,5 +1,5 @@
 let inactivityTimer;
-const logoutAfter = 10 * 1000; // 10 secondes pour test
+const logoutAfter = 10 * 60 * 1000; // 10 secondes pour test
 
 let activityTimer;
 
@@ -27,7 +27,7 @@ function resetActivityTimer() {
     resetInactivityTimer();
     pingActivity();
     clearTimeout(activityTimer);
-    activityTimer = setTimeout(pingActivity, 10 * 1000); // ping toutes les 10s si actif
+    activityTimer = setTimeout(pingActivity, 60 * 1000); // ping toutes les 10s si actif
 }
 
 // Détecte interactions utilisateur

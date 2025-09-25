@@ -5,6 +5,7 @@ from nacl import secret, utils
 import json
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired  # utile pour les tockens
 from datetime import datetime, timedelta
+from flask.sessions import SecureCookieSessionInterface
 
 
 # -----------------------------
@@ -13,14 +14,25 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 
 # Cle secrete Flask pour les sessions
-app.secret_key = utils.random(secret.SecretBox.KEY_SIZE)
+app.secret_key = "key"
+
+cookie_value = "eyJsYXN0X2FjdGl2aXR5IjoxNzU4NzE2NjUxLjQ1MjQzMywidXNlcl9pZCI6NSwidXNlcm5hbWUiOiJvdWlvdWkifQ.aNP_Cw.acJkJTVUc5qQKMZVIDF3pnM5els" 
+s = SecureCookieSessionInterface().get_signing_serializer(app)
+if s is None:
+    print("Erreur : impossible d'obtenir le serializer.")
+else:
+    try:
+        data = s.loads(cookie_value)
+        print("Cookie décodé :", data)
+    except Exception as e:
+        print("Impossible de décoder le cookie :", str(e))
 
 # Cookie de session non permanent → disparaît à la fermeture de l’onglet
 app.config["SESSION_PERMANENT"] = False
 
 # Timeout d’inactivité (ex: 10 min)
-SESSION_TIMEOUT = timedelta(minutes=10)
-INACTIVITY_TIMEOUT = 10 
+# SESSION_TIMEOUT = timedelta(minutes=10)
+INACTIVITY_TIMEOUT = 600 
 
 # Chemin vers la base SQLite
 DB_PATH = "messagerie.db"
